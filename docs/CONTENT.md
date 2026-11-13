@@ -9,7 +9,7 @@ done by a program or by a separate agent with one job, and every agent's output 
 
 | Step | Who | Output |
 |---|---|---|
-| 1. Korean text, options, answer keys, explanations, side notes | `scripts/extract.py`: a parser over the PDF's text layer; no model | `work/ko.json` |
+| 1. Korean text, options, answer keys, explanations, side notes | `scripts/extract.py`: a parser over the PDF's text layer; no model. Side notes in the right column are split off by position; a translator caught 10 options whose last line had landed in the notes, fixed in the parser | `work/ko.json` |
 | 2. Pictures | `extract.py`: cropped from the rendered page at the PDF's own image positions | `apps/web/public/img/` |
 | 3. Line breaks inside words (HWP breaks lines mid-word) | `extract.py`: Kiwi morphological analyzer decides each break | — |
 | 4. Check of 1–3 | `scripts/check_ko.py`: a second, independent extractor (pdfplumber) must contain every question and option; keys must be valid; "2가지" ↔ two answers | `work/check_ko.txt` |
@@ -18,7 +18,8 @@ done by a program or by a separate agent with one job, and every agent's output 
 | 7. Gloss review | 1 separate reviewer agent | `work/agents/vocab-check-out.json` |
 | 8. Question translation | 10 translator agents, ~110 questions each, **without answer keys**, with a shared glossary | `work/agents/q-ru-*.json` |
 | 9. Translation review | 10 separate reviewer agents: Korean + key + Russian; meaning, numbers, negations, and whether the Russian alone leads to the keyed answer | `work/agents/q-check-*.json` |
-| 10. Assembly | `scripts/build.py`: applies fixes, structural guards (option counts, numbers ko = ru) | `apps/web/src/data/*.json`, `work/report.md` |
+| 10. Number review | every field whose digits differ between Korean and Russian (495 of them, mostly 5만 → 50 000) goes to one more reviewer agent, which fixes the real errors | `work/agents/num-check-out.json` |
+| 11. Assembly | `scripts/build.py`: applies fixes, structural guards (option counts must match) | `apps/web/src/data/*.json`, `work/report.md` | `apps/web/src/data/*.json`, `work/report.md` |
 
 Video questions (№ 966–1000) are left out: they need the video from the KoROAD site.
 

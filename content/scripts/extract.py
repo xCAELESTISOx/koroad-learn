@@ -157,7 +157,10 @@ def parse():
                     continue
                 if (b := BULLET_RE.match(line)):
                     cur["bullets"].append(norm(b.group(1)))
-                    mode = "bullet"
+                    # An indented note sits in the right-hand column; a left-column line after it
+                    # still continues the option being read, not the note.
+                    if not (mode == "opt" and len(line) - len(line.lstrip()) >= 10):
+                        mode = "bullet"
                     continue
                 if mode == "bullet":
                     cur["bullets"][-1] = cur["bullets"][-1] + BR + line.strip()

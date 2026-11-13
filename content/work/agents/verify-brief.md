@@ -33,3 +33,5 @@ Do not browse. Do not read other chunks. Work through the whole file; write the 
 at the end check with python3 that it parses and all ids exist in the input.
 
 Final reply: items checked; counts by severity; the 5 most serious problems in one line each.
+
+Temp files: keep ALL temporary files in your own private folder /tmp/claude-0/-home-user/49d2ac7a-ffac-58bc-aab7-fef77dfc0efa/scratchpad/v<chunk number>/ — other agents run at the same time and overwrite shared names.

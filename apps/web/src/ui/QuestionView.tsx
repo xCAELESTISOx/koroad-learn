@@ -49,7 +49,7 @@ export function QuestionView({
           </span>
         )}
       </div>
-      {q.img && <img className="qimg" src={q.img} alt={`Иллюстрация к вопросу ${q.no}`} />}
+      {q.img && <img className={q.kind === "sign" ? "qimg sign" : "qimg"} src={q.img} alt={`Иллюстрация к вопросу ${q.no}`} />}
       {q.ko.notes && (
         <ul className="notes" aria-label="Условия">
           {q.ko.notes.map((n, i) => (

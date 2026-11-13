@@ -37,6 +37,11 @@ for f in sorted(AG.glob("q-check-[0-9]*.json")):
     for item in json.loads(f.read_text()):
         checks.setdefault(item["id"], []).append(item)
 
+numfix = {}
+if (AG / "num-check-out.json").exists():
+    for c in json.loads((AG / "num-check-out.json").read_text()):
+        numfix.setdefault(c["id"], []).append(c)
+
 SOURCE_NOTES = {
     # The question doesn't say "2가지", but the official key has two answers.
     n: "В официальном ключе два правильных ответа, хотя в вопросе не написано «2가지»."
@@ -64,6 +69,17 @@ for q in ko:
         if c["severity"] == "source":
             flag = f"Проверяющий: {c['why']}"
         report.append(f"- {q['id']} [{c['severity']}] {c['why']}")
+    # Number check: a separate pass over every field whose digits differ between ko and ru.
+    for c in numfix.get(q["id"], []):
+        f = c["field"]
+        if f == "q":
+            r["q"] = c["fix"]
+        else:
+            k, i = re.match(r"(opts|notes)\[(\d+)\]", f).groups()
+            r[k] = list(r[k])
+            r[k][int(i)] = c["fix"]
+        stats["numbers"] = stats.get("numbers", 0) + 1
+        report.append(f"- {q['id']} [numbers] {c['why']}")
     # Structural guards: a translation must have the same shape as the original.
     if len(r.get("opts", [])) != len(q["ko"]["opts"]) or len(r.get("notes", [])) != len(q["ko"].get("notes", [])):
         report.append(f"- {q['id']}: shape mismatch, left out")
@@ -72,9 +88,9 @@ for q in ko:
     nums_ko = re.findall(r"\d+(?:[.,]\d+)?", q["ko"]["q"] + " ".join(q["ko"]["opts"]))
     nums_ru = re.findall(r"\d+(?:[.,]\d+)?", r["q"] + " ".join(r["opts"]))
     if sorted(n.replace(",", ".") for n in nums_ko) != sorted(n.replace(",", ".") for n in nums_ru):
-        report.append(f"- {q['id']}: numbers differ ko={nums_ko} ru={nums_ru}")
+        stats["digits_differ"] = stats.get("digits_differ", 0) + 1  # all read by the number reviewer
     out = {**q, "ru": r}
-    if flag:
+    if flag and q["no"] not in SOURCE_NOTES:  # those already carry the note on the source
         out["flag"] = flag
     if q["no"] in SOURCE_NOTES:
         out["srcNote"] = SOURCE_NOTES[q["no"]]
@@ -137,6 +153,7 @@ meta = {
             "1. Корейский текст, ключи ответов и картинки извлечены из официального PDF программой, без ИИ, и сверены вторым независимым извлечением текста.",
             "2. Перевод на русский делали отдельные агенты, которым не показывали ключи ответов.",
             "3. Другие, независимые агенты сверили каждый перевод с корейским оригиналом и ключом: смысл, числа, отрицания, согласованность с правильным ответом. Найденные ошибки исправлены.",
+            "   Отдельно проверены все поля, где цифры в переводе отличаются от корейских (суммы, сроки, скорости, границы «не более/менее»).",
             "4. Словарь — леммы из текстов вопросов (морфологический анализатор Kiwi), переводы проверены отдельным агентом.",
             "Корейский текст — первоисточник. Перевод — подсказка; при сомнении опирайся на корейский.",
         ]),
