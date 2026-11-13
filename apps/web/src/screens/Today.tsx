@@ -35,19 +35,23 @@ export function TodayScreen() {
         )}
       </header>
       <section className="card hero" aria-label="Прогресс">
-        <div className="ring" style={{ "--p": pct } as React.CSSProperties} aria-label={`Выучено ${pct}% вопросов`}>
-          <div>
-            {pct}%<small>выучено</small>
+        <div className="hero-top">
+          <Ring pct={pct} />
+          <div className="hero-text">
+            <b>
+              {qc.learned} из {QUESTIONS.length}
+            </b>
+            <span>вопросов выучено</span>
           </div>
         </div>
-        <div className="grow stats">
+        <div className="stats">
           <div className="stat">
             <b>{qc.due}</b>
             <span>повторить</span>
           </div>
           <div className="stat">
             <b>{qc.seen}</b>
-            <span>из {QUESTIONS.length}</span>
+            <span>пройдено</span>
           </div>
           <div className="stat">
             <b>{wc.seen}</b>
@@ -72,5 +76,24 @@ export function TodayScreen() {
         <Tile href={href("bank")} icon="≡" title="Весь банк по типам" detail={`${QUESTIONS.length} вопросов: текст, знаки, фото, иллюстрации`} />
       </div>
     </main>
+  );
+}
+
+const R = 45.5;
+const C = 2 * Math.PI * R;
+
+/** Share of the bank learned: an SVG ring with the number stacked over it in the same grid cell. */
+function Ring({ pct }: { pct: number }) {
+  return (
+    <div className="ring" role="img" aria-label={`Выучено ${pct}% вопросов`}>
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle className="track" cx="50" cy="50" r={R} />
+        {pct > 0 && <circle className="bar" cx="50" cy="50" r={R} strokeDasharray={C} strokeDashoffset={C * (1 - pct / 100)} />}
+      </svg>
+      <div className="lbl" aria-hidden="true">
+        <b>{pct}%</b>
+        <small>выучено</small>
+      </div>
+    </div>
   );
 }

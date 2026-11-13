@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { META, QUESTION_BY_ID, QUESTIONS } from "../lib/data";
 import { drawExam, pick, score, type ExamState } from "../lib/exam";
 import { buzz, HAPTIC } from "../lib/haptics";
@@ -131,6 +131,11 @@ export function ExamRunScreen() {
     else if (Math.abs(left - 60_000) < 1000) toast("Осталась 1 минута");
   }, [Math.floor(left / 1000)]);
 
+  // Back, Next and the question grid all open the question from its top.
+  useLayoutEffect(() => {
+    scrollTo({ top: 0 });
+  }, [exam.index]);
+
   const q = QUESTION_BY_ID.get(exam.ids[exam.index]!)!;
   const unanswered = useMemo(() => exam.ids.filter((id) => (exam.answers[id]?.length ?? 0) !== QUESTION_BY_ID.get(id)!.ans.length).length, [exam]);
 
@@ -152,7 +157,7 @@ export function ExamRunScreen() {
         <p className="section-title">Разбор: нажми на номер</p>
         <div className="grid-nums">
           {exam.ids.map((id, i) => (
-            <a key={id} href={href("study", id)} className={result.results[i] ? "ok" : "bad"} style={{ display: "grid", placeItems: "center", textDecoration: "none", height: 44, borderRadius: 10 }}>
+            <a key={id} href={href("study", id)} className={result.results[i] ? "ok" : "bad"}>
               {i + 1}
             </a>
           ))}
@@ -198,7 +203,7 @@ export function ExamRunScreen() {
             Назад
           </button>
           {exam.index + 1 < exam.ids.length ? (
-            <button className="btn primary grow" onClick={() => (change({ ...exam, index: exam.index + 1 }), scrollTo({ top: 0 }))}>
+            <button className="btn primary grow" onClick={() => change({ ...exam, index: exam.index + 1 })}>
               Дальше
             </button>
           ) : (

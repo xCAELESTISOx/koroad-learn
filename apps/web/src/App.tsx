@@ -1,3 +1,4 @@
+import { useLayoutEffect } from "react";
 import { useLocation } from "./lib/router";
 import { BankScreen, MistakesScreen } from "./screens/Bank";
 import { ExamRunScreen, ExamScreen } from "./screens/Exam";
@@ -11,6 +12,10 @@ import { TabBar } from "./ui/TabBar";
 
 export function App() {
   const { route, param } = useLocation();
+  // Every screen opens at its top, not at the scroll position of the screen before it.
+  useLayoutEffect(() => {
+    scrollTo({ top: 0 });
+  }, [route, param]);
   // Sessions take the whole screen: no tab bar, so nothing competes with the answer buttons.
   const session =
     route === "study" ? (
