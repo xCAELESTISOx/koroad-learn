@@ -8,7 +8,10 @@
     <meta name="color-scheme" content="dark light" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Opaque, not black-translucent: iOS 26 lays a Home Screen app with black-translucent +
+         viewport-fit=cover out a status bar short of the screen, leaving an empty strip under the
+         tab bar. With "black" the layout reaches the bottom (same fix as KQuiz #81). -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Права 필기" />
     <meta name="description" content="Подготовка к теории на корейские права (2종 보통) по официальному банку вопросов 도로교통공단 и корейские слова из него." />
     <link rel="manifest" href="./manifest.webmanifest" />
