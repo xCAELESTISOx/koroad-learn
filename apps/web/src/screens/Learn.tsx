@@ -3,6 +3,7 @@ import { distractors } from "../lib/choice";
 import { QUESTION_BY_ID, WORD_BY_ID, WORD_IDS, WORDS } from "../lib/data";
 import { buzz, HAPTIC } from "../lib/haptics";
 import { highlight } from "../lib/korean";
+import { addToList } from "../lib/kquiz";
 import { buildQueue, requeue, shuffle } from "../lib/queue";
 import { go } from "../lib/router";
 import { formatIn, previewDue, Rating, review, type Grade } from "../lib/srs";
@@ -56,7 +57,10 @@ export function LearnScreen() {
 
   const commit = (grade: Grade) => {
     update((p) => {
-      if (!p.w[w.id]) p.fresh.w++;
+      if (!p.w[w.id]) {
+        p.fresh.w++;
+        addToList(p, w.id);
+      }
       p.w[w.id] = review(p.w[w.id], grade);
     });
     if (grade === Rating.Again && queue.filter((x) => x === w.id).length < 2) setQueue(requeue(queue, index, w.id, 4));

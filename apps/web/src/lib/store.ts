@@ -29,6 +29,8 @@ export interface Progress {
   exams: ExamResult[];
   settings: Settings;
   installHiddenAt?: number;
+  /** Words to hand over to KQuiz (lib/kquiz.ts): waiting to be copied, and already sent. */
+  kquiz: { list: string[]; sent: string[] };
 }
 
 export const KEY = "koroad-learn:v1";
@@ -49,6 +51,8 @@ export function normalize(raw: unknown, now = Date.now()): Progress {
     fresh: p.fresh?.day === day ? p.fresh : { day, q: 0, w: 0 },
     exams: p.exams ?? [],
     settings: { ...DEFAULTS, ...p.settings },
+    // Before the list existed, the words already studied here are the ones to send first.
+    kquiz: p.kquiz ?? { list: Object.keys(p.w ?? {}), sent: [] },
     ...(p.installHiddenAt ? { installHiddenAt: p.installHiddenAt } : {}),
   };
 }

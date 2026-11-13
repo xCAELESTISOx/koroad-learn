@@ -338,3 +338,6 @@ h1, h2, h3 { margin: 0; }
 .notes { margin: 0; padding: 12px 14px; list-style: none; background: var(--surface-raised); border-radius: var(--radius-sm); font-size: var(--fs-sm); line-height: 1.6; display: flex; flex-direction: column; gap: 6px; }
 .notes li { position: relative; padding-left: 16px; }
 .notes li::before { content: ""; position: absolute; left: 2px; top: 0.65em; width: 6px; height: 6px; border-radius: 2px; background: var(--accent); }
+.kq-words { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.kq-words .chip { min-height: 32px; padding: 4px 12px; font-size: var(--fs-sm); color: var(--text); }
+.sheet .btn.ghost[aria-pressed="true"] { color: var(--text-muted); }

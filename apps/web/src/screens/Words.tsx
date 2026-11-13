@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { claudePrompt, copyText, markSent } from "../lib/kquiz";
 import { WORD_BY_ID, WORD_IDS, WORDS } from "../lib/data";
 import { counts } from "../lib/queue";
 import { href } from "../lib/router";
 import { level } from "../lib/srs";
-import { useProgress } from "../lib/store";
+import { update, useProgress } from "../lib/store";
 import type { Word } from "../lib/types";
+import { plural } from "../lib/plural";
 import { BackIcon } from "../ui/icons";
-import { openWord } from "../ui/overlay";
+import { openWord, toast } from "../ui/overlay";
 
 export function WordRow({ w }: { w: Word }) {
   const p = useProgress();
@@ -55,6 +57,7 @@ export function WordsScreen() {
       <a className="btn primary" href={href("learn")} aria-disabled={!(wc.due + wc.fresh)}>
         Учить <span className="badge">{wc.due + wc.fresh}</span>
       </a>
+      <KquizCard />
       <p className="section-title">Самые частые</p>
       <div className="list">
         {top.map((w) => (
@@ -88,5 +91,60 @@ export function WordListScreen() {
       </div>
       {list.length > 300 && <p className="faint small">Показаны первые 300. Уточни поиск.</p>}
     </main>
+  );
+}
+
+/** The words collected for KQuiz, copied in one go with a brief for Claude and its KQuiz connector. */
+function KquizCard() {
+  const p = useProgress();
+  const [copied, setCopied] = useState(false);
+  const words = p.kquiz.list.map((id) => WORD_BY_ID.get(id)).filter((w): w is Word => !!w);
+  return (
+    <>
+      <p className="section-title">Для KQuiz</p>
+      <section className="card stack kq">
+        {words.length ? (
+          <>
+            <p className="kq-words" lang="ko">
+              {words.slice(0, 12).map((w) => (
+                <button key={w.id} className="chip" onClick={() => openWord(w.id)}>
+                  {w.ko}
+                </button>
+              ))}
+              {words.length > 12 && <span className="faint small">и ещё {words.length - 12}</span>}
+            </p>
+            <p className="muted small">
+              Скопируй список и вставь в чат с Claude, где подключён KQuiz: он сам пропустит слова, которые уже есть, добавит примеры и свяжет похожие.
+            </p>
+            <button
+              className="btn primary"
+              onClick={async () => {
+                const ok = await copyText(claudePrompt(words));
+                setCopied(ok);
+                toast(ok ? `Скопировано: ${words.length} ${plural(words.length, "слово", "слова", "слов")}` : "Не получилось скопировать");
+              }}
+            >
+              Скопировать для Claude <span className="badge">{words.length}</span>
+            </button>
+            {copied && (
+              <button
+                className="btn ghost"
+                onClick={() => {
+                  update(markSent);
+                  setCopied(false);
+                  toast("Список очищен");
+                }}
+              >
+                Отправил, очистить список
+              </button>
+            )}
+          </>
+        ) : (
+          <p className="muted small">
+            Сюда попадают новые слова из «Учить» и те, что ты отметишь в карточке слова. {p.kquiz.sent.length ? `Уже отправлено: ${p.kquiz.sent.length}.` : ""}
+          </p>
+        )}
+      </section>
+    </>
   );
 }
