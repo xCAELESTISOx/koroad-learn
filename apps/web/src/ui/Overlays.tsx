@@ -1,4 +1,5 @@
 import { WORD_BY_ID } from "../lib/data";
+import { addToList, removeFromList } from "../lib/kquiz";
 import { level } from "../lib/srs";
 import { update, useProgress } from "../lib/store";
 import { review, Rating } from "../lib/srs";
@@ -35,6 +36,7 @@ export function Overlays() {
               // Seen once, so the next session asks it back right away.
               update((p) => {
                 p.w[w.id] = { ...review(undefined, Rating.Again), due: Date.now() };
+                addToList(p, w.id);
               });
               toast("Слово добавлено в повторение");
               closeWord();
@@ -42,6 +44,20 @@ export function Overlays() {
           >
             {sched ? `Уже в изучении · ${LEVEL[level(sched)]}` : "Учить это слово"}
           </button>
+          {progress.kquiz.sent.includes(w.id) ? (
+            <p className="muted small" style={{ textAlign: "center", marginTop: 12 }}>
+              Уже отправлено в KQuiz
+            </p>
+          ) : (
+            <button
+              className="btn ghost"
+              style={{ marginTop: 8 }}
+              aria-pressed={progress.kquiz.list.includes(w.id)}
+              onClick={() => update((p) => (p.kquiz.list.includes(w.id) ? removeFromList(p, w.id) : addToList(p, w.id)))}
+            >
+              {progress.kquiz.list.includes(w.id) ? "✓ В списке для KQuiz · убрать" : "В список для KQuiz"}
+            </button>
+          )}
         </Sheet>
       )}
       <div className={`toast${t ? " on" : ""}`} role="status" aria-live="polite">
