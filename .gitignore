@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+content/work/tmp/
+__pycache__/
+.DS_Store

@@ -1,0 +1,4 @@
+738: '2가지' is False but 2 answers (2, 4)
+835: '2가지' is False but 2 answers (2, 3)
+1025: '2가지' is False but 2 answers (2, 3)
+1034: '2가지' is False but 2 answers (3, 4)
