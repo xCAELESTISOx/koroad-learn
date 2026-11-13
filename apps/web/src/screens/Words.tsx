@@ -97,7 +97,6 @@ export function WordListScreen() {
 /** The words collected for KQuiz, copied in one go with a brief for Claude and its KQuiz connector. */
 function KquizCard() {
   const p = useProgress();
-  const [copied, setCopied] = useState(false);
   const words = p.kquiz.list.map((id) => WORD_BY_ID.get(id)).filter((w): w is Word => !!w);
   return (
     <>
@@ -120,24 +119,21 @@ function KquizCard() {
               className="btn primary"
               onClick={async () => {
                 const ok = await copyText(claudePrompt(words));
-                setCopied(ok);
                 toast(ok ? `Скопировано: ${words.length} ${plural(words.length, "слово", "слова", "слов")}` : "Не получилось скопировать");
               }}
             >
               Скопировать для Claude <span className="badge">{words.length}</span>
             </button>
-            {copied && (
-              <button
-                className="btn ghost"
-                onClick={() => {
-                  update(markSent);
-                  setCopied(false);
-                  toast("Список очищен");
-                }}
-              >
-                Отправил, очистить список
-              </button>
-            )}
+            <button
+              className="btn ghost"
+              onClick={() => {
+                const n = words.length;
+                update(markSent);
+                toast(`Отправлено в KQuiz: ${n}`);
+              }}
+            >
+              Отметить все отправленными
+            </button>
           </>
         ) : (
           <p className="muted small">
